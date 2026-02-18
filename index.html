@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Focus Planner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <style>
+    :root{
+      --bg1:#667eea;
+      --bg2:#764ba2;
+      --card:rgba(0,0,0,0.3);
+      --text:#ffffff;
+      --btn:#00d2ff;
+    }
+
+    body.light{
+      --bg1:#f5f7fa;
+      --bg2:#c3cfe2;
+      --card:rgba(255,255,255,0.8);
+      --text:#000;
+      --btn:#667eea;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Arial, sans-serif;
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:var(--text);
+    }
+
+    .container{
+      width:95%;
+      max-width:380px;
+      background:var(--card);
+      padding:20px;
+      border-radius:16px;
+      box-shadow:0 15px 40px rgba(0,0,0,0.35);
+    }
+
+    h1{text-align:center;margin:0 0 10px}
+
+    input,button{
+      width:100%;
+      padding:10px;
+      margin-top:8px;
+      border:none;
+      border-radius:8px;
+      font-size:14px;
+    }
+
+    button{
+      background:var(--btn);
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    button:hover{opacity:.85}
+
+    .task{
+      background:rgba(255,255,255,0.15);
+      padding:10px;
+      border-radius:10px;
+      margin-top:10px;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+
+    .row button{
+      width:auto;
+      padding:6px 10px;
+      font-size:12px;
+    }
+
+    .lofi{
+      margin-top:15px;
+      display:block;
+      text-align:center;
+      padding:10px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#ff512f,#f09819);
+      color:#fff;
+      font-weight:bold;
+      text-decoration:none;
+    }
+
+    .toggle{
+      background:#00000030;
+      color:var(--text);
+    }
+  </style></head>
+<body><div class="container">
+  <h1>Focus Planner</h1><button class="toggle" onclick="toggleTheme()">Toggle Dark / Light</button>
+
+  <input id="name" placeholder="Task name">
+  <input id="time" type="number" placeholder="Minutes">
+  <button onclick="addTask()">Add Task</button>  <div id="list"></div>  <a class="lofi" href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq" target="_blank">
+    LORD LOFI EDITZ
+  </a>
+</div><audio id="alarm">
+  <source src="https://www.soundjay.com/buttons/sounds/beep-07.mp3">
+</audio><script>
+  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+  function save(){ localStorage.setItem("tasks",JSON.stringify(tasks)); }
+
+  function toggleTheme(){ document.body.classList.toggle("light"); }
+
+  function addTask(){
+    const name=document.getElementById("name").value;
+    const min=document.getElementById("time").value;
+    if(!name||!min) return;
+
+    tasks.push({name,time:min*60,done:false});
+    save();
+    render();
+
+    document.getElementById("name").value="";
+    document.getElementById("time").value="";
+  }
+
+  function deleteTask(i){ tasks.splice(i,1); save(); render(); }
+
+  function render(){
+    const box=document.getElementById("list");
+    box.innerHTML="";
+
+    tasks.forEach((t,i)=>{
+      const d=document.createElement("div");
+      d.className="task";
+
+      const title=document.createElement("strong");
+      title.innerText=t.name;
+
+      const timer=document.createElement("span");
+      timer.innerText=format(t.time);
+
+      const row=document.createElement("div");
+      row.className="row";
+
+      const start=document.createElement("button");
+      start.innerText="Start";
+      start.onclick=()=>runTimer(i,timer,start);
+
+      const del=document.createElement("button");
+      del.innerText="Delete";
+      del.onclick=()=>deleteTask(i);
+
+      row.append(start,del);
+      d.append(title,timer,row);
+      box.appendChild(d);
+    });
+  }
+
+  function runTimer(i,label,btn){
+    btn.disabled=true;
+    const int=setInterval(()=>{
+      if(tasks[i].time<=0){
+        clearInterval(int);
+        label.innerText="Completed";
+        document.getElementById("alarm").play();
+        save();
+        return;
+      }
+      tasks[i].time--;
+      label.innerText=format(tasks[i].time);
+      save();
+    },1000);
+  }
+
+  funindex.html>
