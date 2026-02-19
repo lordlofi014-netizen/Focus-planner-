@@ -36,7 +36,12 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 <body>
 <div class="container">
   <h1 class="title">OM SANSKAR - Stats & Calendar</h1>
+
+  <!-- Install Button -->
+  <button id="installBtn" style="margin:10px 0; background:gold; color:#000; font-weight:bold; display:none;">📲 Install App</button>
+
   <button id="themeToggle">🌙 Toggle Theme</button>
+
   <nav>
     <button onclick="location.href='index.html'">Tasks</button>
     <button onclick="location.href='diary.html'">Diary</button>
@@ -80,7 +85,7 @@ function renderCalendar(){
   const year=now.getFullYear(), month=now.getMonth();
   const firstDay=new Date(year,month,1).getDay();
   const daysInMonth=new Date(year,month+1,0).getDate();
-  for(let i=0;i<firstDay;i++){const blank=document.createElement("div");calendar.appendChild(blank);}
+  for(let i=0;i<firstDay;i++){calendar.appendChild(document.createElement("div"));}
   for(let d=1;d<=daysInMonth;d++){
     const day=document.createElement("div");
     day.className="day";
@@ -101,35 +106,12 @@ renderCalendar();
 
 // ---------- Motivational Quotes ----------
 const quotes=[
-"Believe you can and you're halfway there.",
-"Every day is a second chance.",
-"Do what you can with what you have.",
-"Focus on progress, not perfection.",
-"Your limitation—it’s only your imagination.",
-"Push yourself, because no one else is going to do it for you.",
-"Great things never come from comfort zones.",
-"Dream it. Wish it. Do it.",
-"Success doesn’t just find you. You have to go out and get it.",
-"Don’t stop when you’re tired. Stop when you’re done.",
-"Little things make big days.",
-"Don’t wait for opportunity. Create it.",
-"Sometimes later becomes never. Do it now.",
-"Hard work beats talent when talent doesn’t work hard.",
-"Stay positive, work hard, make it happen.",
-"Don’t watch the clock; do what it does. Keep going.",
-"Your only limit is you.",
-"The key to success is to start before you’re ready.",
-"Don’t count the days; make the days count.",
-"Work hard in silence. Let success make the noise.",
-"Success is not for the lazy.",
-"Believe in yourself and all that you are.",
-"Good things take time.",
-"Stay focused and never give up.",
-"Every accomplishment starts with the decision to try.",
-"Wake up with determination. Go to bed with satisfaction.",
-"Opportunities don’t happen, you create them.",
-"Don’t quit. Suffer now and live the rest of your life as a champion.",
-"Your future is created by what you do today."
+"Believe you can and you're halfway there.","Every day is a second chance.","Do what you can with what you have.","Focus on progress, not perfection.","Your limitation—it’s only your imagination.",
+"Push yourself, because no one else is going to do it for you.","Great things never come from comfort zones.","Dream it. Wish it. Do it.","Success doesn’t just find you. You have to go out and get it.","Don’t stop when you’re tired. Stop when you’re done.",
+"Little things make big days.","Don’t wait for opportunity. Create it.","Sometimes later becomes never. Do it now.","Hard work beats talent when talent doesn’t work hard.","Stay positive, work hard, make it happen.",
+"Don’t watch the clock; do what it does. Keep going.","Your only limit is you.","The key to success is to start before you’re ready.","Don’t count the days; make the days count.","Work hard in silence. Let success make the noise.",
+"Success is not for the lazy.","Believe in yourself and all that you are.","Good things take time.","Stay focused and never give up.","Every accomplishment starts with the decision to try.",
+"Wake up with determination. Go to bed with satisfaction.","Opportunities don’t happen, you create them.","Don’t quit. Suffer now and live the rest of your life as a champion.","Your future is created by what you do today."
 ];
 function newQuote(){document.getElementById("quote").textContent=quotes[Math.floor(Math.random()*quotes.length)];}
 document.getElementById("newQuote").onclick=newQuote;
@@ -166,10 +148,28 @@ document.getElementById("importFile").onchange=(e)=>{
   reader.readAsText(file);
 };
 
-// ---------- PWA Service Worker Registration ----------
+// ---------- PWA Install Button ----------
+let deferredPrompt;
+const installBtn = document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBtn.style.display = 'block';
+});
+installBtn.addEventListener('click', async () => {
+  installBtn.style.display = 'none';
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    console.log('User response to install:', outcome);
+  }
+});
+
+// ---------- Service Worker ----------
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('service-worker.js')
-  .then(()=>console.log('Service Worker Registered'))
+  .then(()=>console.log('SW Registered'))
   .catch(err=>console.log('SW Registration Failed:', err));
 }
 </script>
