@@ -10,74 +10,43 @@
   --bg1:#667eea;
   --bg2:#764ba2;
   --card:rgba(0,0,0,0.3);
-  --text:#ffffff;
+  --text:#fff;
   --btn:#00d2ff;
+  --danger:#ff4d4d;
 }
-
 body.light{
   --bg1:#f5f7fa;
   --bg2:#c3cfe2;
   --card:rgba(255,255,255,0.85);
-  --text:#000000;
+  --text:#000;
   --btn:#667eea;
 }
-
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   background:linear-gradient(135deg,var(--bg1),var(--bg2));
   color:var(--text);
   min-height:100vh;
 }
-
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
-}
-
-h1{
-  text-align:center;
-}
-
-.card{
-  background:var(--card);
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-}
-
+.container{max-width:500px;margin:auto;padding:20px;}
+h1{text-align:center;}
+.card{background:var(--card);padding:15px;border-radius:12px;}
 input,button{
   width:100%;
   padding:10px;
   margin-top:10px;
   border:none;
   border-radius:8px;
-  font-size:16px;
 }
-
-button{
-  background:var(--btn);
-  color:white;
-  cursor:pointer;
-}
-
+button{background:var(--btn);color:#fff;font-size:16px;}
 .task{
-  margin-top:10px;
-  padding:10px;
   background:rgba(255,255,255,0.15);
+  padding:10px;
   border-radius:8px;
+  margin-top:10px;
 }
-
-.timer{
-  font-size:14px;
-  margin-top:5px;
-}
-
-.toggle{
-  text-align:center;
-  margin-bottom:10px;
-}
+.task-buttons{display:flex;gap:10px;}
+.delete{background:var(--danger);}
 </style>
 </head>
 
@@ -85,12 +54,10 @@ button{
 <div class="container">
   <h1>Focus Planner</h1>
 
-  <div class="toggle">
-    <button id="themeToggle">🌙 Toggle Theme</button>
-  </div>
+  <button id="themeToggle">🌙 Toggle Theme</button>
 
   <div class="card">
-    <input id="taskName" placeholder="Task name (Study, Work...)">
+    <input id="taskName" placeholder="Task name">
     <input id="taskTime" type="number" placeholder="Time in minutes">
     <button id="addTask">Add Task</button>
   </div>
@@ -103,53 +70,62 @@ button{
 </div>
 
 <script>
-let tasksDiv = document.getElementById("tasks");
+const tasksDiv = document.getElementById("tasks");
 
-document.getElementById("addTask").onclick = function(){
-  let name = taskName.value.trim();
-  let time = parseInt(taskTime.value);
+document.getElementById("addTask").onclick = () => {
+  const name = taskName.value.trim();
+  const mins = parseInt(taskTime.value);
+  if(!name || !mins) return;
 
-  if(!name || !time) return;
+  const endTime = Date.now() + mins*60000;
 
-  let task = document.createElement("div");
+  const task = document.createElement("div");
   task.className = "task";
-
-  let remaining = time * 60;
 
   task.innerHTML = `
     <strong>${name}</strong>
-    <div class="timer">Time: <span>${time}:00</span></div>
-    <button>Start</button>
+    <div>Remaining: <span>--:--</span></div>
+    <div class="task-buttons">
+      <button class="start">Start</button>
+      <button class="delete">Delete</button>
+    </div>
   `;
 
-  let span = task.querySelector("span");
-  let btn = task.querySelector("button");
-  let interval;
+  let interval = null;
+  const span = task.querySelector("span");
 
-  btn.onclick = function(){
+  const update = () => {
+    const diff = endTime - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      span.textContent = "00:00";
+      alert(name + " completed!");
+      return;
+    }
+    const m = Math.floor(diff/60000);
+    const s = Math.floor((diff%60000)/1000);
+    span.textContent = m + ":" + (s<10?"0":"") + s;
+  };
+
+  task.querySelector(".start").onclick = () => {
     if(interval) return;
-    interval = setInterval(()=>{
-      if(remaining <= 0){
-        clearInterval(interval);
-        alert(name + " completed!");
-        return;
-      }
-      remaining--;
-      let m = Math.floor(remaining/60);
-      let s = remaining%60;
-      span.textContent = m + ":" + (s<10?"0":"") + s;
-    },1000);
+    update();
+    interval = setInterval(update, 1000);
+  };
+
+  task.querySelector(".delete").onclick = () => {
+    clearInterval(interval);
+    task.remove();
   };
 
   tasksDiv.appendChild(task);
-  taskName.value="";
-  taskTime.value="";
+  taskName.value = "";
+  taskTime.value = "";
 };
 
-document.getElementById("themeToggle").onclick = function(){
+themeToggle.onclick = () => {
   document.body.classList.toggle("light");
 };
 </script>
-
 </body>
 </html>
