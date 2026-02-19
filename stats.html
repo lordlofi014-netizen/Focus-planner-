@@ -25,15 +25,11 @@ h1.title{font-family:'Comic Sans MS',cursive,sans-serif;font-size:2rem;margin-bo
 nav{margin-bottom:15px;}
 nav button{margin:0 5px;padding:8px 12px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;background:var(--btn);color:#fff;}
 .card{background:var(--card);padding:15px;border-radius:12px;text-align:left;margin-bottom:15px;}
-button,input,textarea{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
+button,input{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
 button{background:var(--btn);color:#fff;cursor:pointer;}
-.calendar-header{text-align:center;margin-bottom:10px;}
-.calendar-header span{font-weight:bold;}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;}
-.day{padding:10px;border-radius:5px;background:rgba(255,255,255,0.2);cursor:pointer;position:relative;}
-.day.today{border:2px solid gold;}
+.day{padding:10px;border-radius:5px;background:rgba(255,255,255,0.2);cursor:pointer;}
 .day.marked{background:gold;color:#000;font-weight:bold;}
-.reminder{position:absolute;bottom:2px;left:2px;font-size:12px;color:#000;}
 textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 </style>
 </head>
@@ -54,9 +50,6 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 
   <div class="card">
     <h3>Calendar</h3>
-    <div class="calendar-header">
-      <span id="monthYear"></span>
-    </div>
     <div id="calendar" class="calendar"></div>
   </div>
 
@@ -74,7 +67,7 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 
   <div class="card">
     <h3>Privacy Policy</h3>
-    <p>This web app does not collect personal data. All tasks and diary entries are stored locally on your device. For any queries, contact: <strong>lordlofi014@gmail.com</strong></p>
+    <p>This web app does not collect personal data. All tasks and diary entries are stored locally on your device. Contact: <strong>lordlofi014@gmail.com</strong></p>
     <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq"><button style="margin-top:10px">LORD LOFI EDITZ</button></a>
   </div>
 </div>
@@ -83,53 +76,67 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 // ---------- Theme ----------
 document.getElementById("themeToggle").onclick=()=>{document.body.classList.toggle("dark");}
 
-// ---------- Calendar ----------
-let markedDates=JSON.parse(localStorage.getItem("markedDates")||"[]");
-let reminders=JSON.parse(localStorage.getItem("reminders")||"{}");
-const calendar=document.getElementById("calendar");
-const monthYear=document.getElementById("monthYear");
+// ---------- Calendar with Reminders ----------
+let markedDates = JSON.parse(localStorage.getItem("markedDates") || "[]");
+let reminders = JSON.parse(localStorage.getItem("reminders") || {}); // { "2026-2-19": "Reminder text" }
 
-function renderCalendar(){
-  calendar.innerHTML="";
-  const now=new Date();
-  const year=now.getFullYear(), month=now.getMonth();
-  const today=now.getDate();
-  const firstDay=new Date(year,month,1).getDay();
-  const daysInMonth=new Date(year,month+1,0).getDate();
-  monthYear.textContent=`${now.toLocaleString('default',{month:'long'})} ${year}`;
+const calendar = document.getElementById("calendar");
 
-  for(let i=0;i<firstDay;i++){calendar.appendChild(document.createElement("div"));}
-  for(let d=1;d<=daysInMonth;d++){
-    const day=document.createElement("div");
-    day.className="day";
-    if(d===today) day.classList.add("today");
+function renderCalendar() {
+  calendar.innerHTML = "";
 
-    const dayStr=`${year}-${month+1}-${d}`;
-    if(markedDates.includes(dayStr)) day.classList.add("marked");
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    day.textContent=d;
+  // Show today info above calendar
+  const today = `${now.getDate()}-${month + 1}-${year}`;
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+  let todayInfo = document.getElementById("todayInfo");
+  if (!todayInfo) {
+    todayInfo = document.createElement("p");
+    todayInfo.id = "todayInfo";
+    todayInfo.style.fontWeight = "bold";
+    todayInfo.style.marginBottom = "5px";
+    calendar.parentElement.insertBefore(todayInfo, calendar);
+  }
+  todayInfo.textContent = `Today: ${dayName}, ${monthName} ${now.getDate()}, ${year}`;
 
-    if(reminders[dayStr]){
-      const rem=document.createElement("div");
-      rem.className="reminder";
-      rem.textContent=reminders[dayStr];
-      day.appendChild(rem);
-    }
+  // blank spaces for first day
+  for (let i = 0; i < firstDay; i++) calendar.appendChild(document.createElement("div"));
 
-    day.onclick=()=>{
-      let msg=prompt(`Add/Update reminder for ${dayStr}:`, reminders[dayStr]||"");
-      if(msg!==null){
-        reminders[dayStr]=msg;
-        if(msg==="") delete reminders[dayStr];
-        if(!markedDates.includes(dayStr)) markedDates.push(dayStr);
-        localStorage.setItem("markedDates",JSON.stringify(markedDates));
-        localStorage.setItem("reminders",JSON.stringify(reminders));
-        renderCalendar();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayDiv = document.createElement("div");
+    dayDiv.className = "day";
+    const dayStr = `${year}-${month + 1}-${d}`;
+
+    if (markedDates.includes(dayStr)) dayDiv.classList.add("marked");
+
+    dayDiv.textContent = d;
+
+    dayDiv.onclick = () => {
+      let text = prompt("Enter reminder for this date:", reminders[dayStr] || "");
+      if (text === null) return; // cancelled
+      if (text.trim() === "") {
+        // delete reminder
+        delete reminders[dayStr];
+        markedDates = markedDates.filter(x => x !== dayStr); // remove mark
+      } else {
+        reminders[dayStr] = text;
+        if (!markedDates.includes(dayStr)) markedDates.push(dayStr); // mark date
       }
+
+      localStorage.setItem("reminders", JSON.stringify(reminders));
+      localStorage.setItem("markedDates", JSON.stringify(markedDates));
+      renderCalendar();
     };
-    calendar.appendChild(day);
+
+    calendar.appendChild(dayDiv);
   }
 }
+
 renderCalendar();
 
 // ---------- Motivational Quotes ----------
@@ -151,7 +158,7 @@ document.getElementById("exportBtn").onclick=()=>{
   const diary=JSON.parse(localStorage.getItem("diaryEntries")||"[]");
   const streak=JSON.parse(localStorage.getItem("streakDays")||"[]");
   const marked=JSON.parse(localStorage.getItem("markedDates")||"[]");
-  const data={tasks,diary,streak,marked,reminders};
+  const data={tasks,diary,streak,marked};
   const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
