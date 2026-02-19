@@ -2,140 +2,328 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Focus Planner</title>
+<title>OM SANSKAR - Focus Planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
-
 <style>
 :root{
-  --bg1:#667eea;
-  --bg2:#764ba2;
-  --card:rgba(0,0,0,0.3);
-  --text:#fff;
-  --btn:#00d2ff;
-  --danger:#ff4d4d;
+  --bg1:#667eea; --bg2:#764ba2; --card:rgba(0,0,0,0.3);
+  --text:#fff; --btn:#00d2ff; --danger:#ff4d4d;
 }
 body.light{
-  --bg1:#f5f7fa;
-  --bg2:#c3cfe2;
-  --card:rgba(255,255,255,0.85);
-  --text:#000;
-  --btn:#667eea;
+  --bg1:#f5f7fa; --bg2:#c3cfe2; --card:rgba(255,255,255,0.85); --text:#000; --btn:#667eea;
 }
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:linear-gradient(135deg,var(--bg1),var(--bg2));
-  color:var(--text);
-  min-height:100vh;
-}
-.container{max-width:500px;margin:auto;padding:20px;text-align:center;}
-h1.title{font-family:'Comic Sans MS', cursive, sans-serif;font-size:2rem;margin-bottom:10px;}
-.card{background:var(--card);padding:15px;border-radius:12px;text-align:left;}
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:10px;
-  border:none;
-  border-radius:8px;
-}
-button{background:var(--btn);color:#fff;font-size:16px;}
-.task{
-  background:rgba(255,255,255,0.15);
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px;
-}
-.task-buttons{display:flex;gap:10px;}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);min-height:100vh;}
+.container{max-width:700px;margin:auto;padding:20px;text-align:center;}
+h1.title{font-family:'Comic Sans MS',cursive,sans-serif;font-size:2rem;margin-bottom:10px;}
+nav{margin-bottom:15px;}
+nav button{margin:0 5px;padding:8px 12px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;background:var(--btn);color:#fff;}
+section{display:none;}
+section.active{display:block;}
+.card{background:var(--card);padding:15px;border-radius:12px;text-align:left;margin-bottom:15px;}
+input,select,textarea,button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;}
+button{background:var(--btn);color:#fff;font-size:16px;cursor:pointer;}
+.task{background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;margin-top:10px;}
+.task-buttons{display:flex;gap:10px;margin-top:5px;}
 .delete{background:var(--danger);}
-.privacy{background:var(--card);padding:15px;border-radius:12px;margin-top:20px;text-align:left;font-size:0.9rem;}
+.progress{height:6px;background:#ccc;border-radius:3px;margin-top:5px;}
+.progress-fill{height:6px;background:var(--btn);border-radius:3px;width:0%;}
 </style>
 </head>
-
 <body>
 <div class="container">
-  <h1 class="title">OM SANSKAR</h1>
+  <h1 class="title">OM SANSKAR - Focus Planner</h1>
   <button id="themeToggle">🌙 Toggle Theme</button>
+  <nav>
+    <button data-tab="tasks">Tasks</button>
+    <button data-tab="diary">Diary</button>
+    <button data-tab="stats">Stats</button>
+  </nav>
 
-  <div class="card">
-    <input id="taskName" placeholder="Task name">
-    <input id="taskTime" type="number" placeholder="Time in minutes">
-    <button id="addTask">Add Task</button>
-  </div>
+  <!-- Tasks Section -->
+  <section id="tasks" class="active">
+    <div class="card">
+      <input id="taskName" placeholder="Task name">
+      <input id="taskTime" type="number" placeholder="Time in minutes">
+      <select id="taskPriority">
+        <option value="High">High Priority</option>
+        <option value="Medium">Medium Priority</option>
+        <option value="Low">Low Priority</option>
+      </select>
+      <button id="addTask">Add Task</button>
+      <h4>Quick Add:</h4>
+      <div id="quickAddButtons"></div>
+      <label>Auto Mode <input type="checkbox" id="autoMode"></label>
+      <label>Gap between tasks (seconds): <input type="number" id="gapTime" value="5" min="0" max="60"></label>
+    </div>
+    <div id="tasksList"></div>
+  </section>
 
-  <div id="tasks"></div>
+  <!-- Diary Section -->
+  <section id="diary">
+    <div class="card">
+      <textarea id="diaryText" placeholder="Write your diary/to-do entry"></textarea>
+      <button id="addDiary">Add Entry</button>
+    </div>
+    <div id="diaryList"></div>
+  </section>
 
-  <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq">
-    <button style="margin-top:15px">LORD LOFI EDITZ</button>
-  </a>
-
-  <!-- Privacy Policy Section -->
-  <div class="privacy">
-    <h2>Privacy Policy</h2>
-    <p>We do not collect any personal information. All tasks and data are stored locally in your browser and are not sent to any server.</p>
-    <p>Cookies or local storage are used only to keep your tasks and theme preferences.</p>
-    <p>By using this site, you agree to this privacy policy.</p>
-    <p>Contact: <a href="mailto:your-email@example.com">your-email@example.com</a></p>
-  </div>
+  <!-- Stats Section -->
+  <section id="stats">
+    <div class="card">
+      <h3>Weekly Streak</h3>
+      <p id="streakDisplay">0/7 days</p>
+      <button id="exportData">Export Tasks & Diary</button>
+      <button id="importData">Import Data</button>
+    </div>
+  </section>
 </div>
 
+<audio id="buzzer" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+
 <script>
-const tasksDiv = document.getElementById("tasks");
+// ----------------- Variables -----------------
+let tasks = JSON.parse(localStorage.getItem("tasks")||"[]");
+let diary = JSON.parse(localStorage.getItem("diary")||"[]");
+let streakDays = JSON.parse(localStorage.getItem("streakDays")||"[]");
+let currentTaskIndex=0, interval=null;
+const tasksDiv=document.getElementById("tasksList");
+const diaryDiv=document.getElementById("diaryList");
+const buzzer=document.getElementById("buzzer");
 
-document.getElementById("addTask").onclick = () => {
-  const name = taskName.value.trim();
-  const mins = parseInt(taskTime.value);
-  if(!name || !mins) return;
+// Motivational quotes
+const quotes=[
+"Keep going, you’re doing great!",
+"Small steps every day lead to big results.",
+"Focus on progress, not perfection.",
+"One task at a time, one step at a time.",
+"Your hard work will pay off!",
+"Stay positive, stay productive!",
+"Believe you can and you’re halfway there.",
+"Consistency is the key to success.",
+"Don’t wait for opportunity, create it.",
+"Focus is the bridge between goals and accomplishment.",
+"Every small effort counts!",
+"Push yourself, because no one else will do it for you.",
+"Discipline is choosing between what you want now and what you want most.",
+"Great things take time, keep working!",
+"Success is the sum of small efforts repeated daily.",
+"Your focus determines your reality.",
+"Do it now. Sometimes later becomes never.",
+"Dream it. Wish it. Do it.",
+"Stay strong, make them wonder how you’re still smiling.",
+"Productivity is never an accident. It’s always intentional.",
+"Every day is a chance to get better.",
+"Motivation gets you going, habit keeps you growing.",
+"Don’t watch the clock; do what it does. Keep going.",
+"Success doesn’t just find you. You have to go out and get it.",
+"Focus on being productive instead of busy.",
+"Small progress is still progress.",
+"Hard work beats talent when talent doesn’t work hard.",
+"Your only limit is you.",
+"Make each day your masterpiece.",
+"Start where you are. Use what you have. Do what you can."
+];
 
-  const endTime = Date.now() + mins*60000;
+// ----------------- Utility Functions -----------------
+function saveTasks(){localStorage.setItem("tasks",JSON.stringify(tasks));}
+function saveDiary(){localStorage.setItem("diary",JSON.stringify(diary));}
+function saveStreak(){localStorage.setItem("streakDays",JSON.stringify(streakDays));}
 
-  const task = document.createElement("div");
-  task.className = "task";
-
-  task.innerHTML = `
-    <strong>${name}</strong>
-    <div>Remaining: <span>--:--</span></div>
-    <div class="task-buttons">
-      <button class="start">Start</button>
-      <button class="delete">Delete</button>
-    </div>
-  `;
-
-  let interval = null;
-  const span = task.querySelector("span");
-
-  const update = () => {
-    const diff = endTime - Date.now();
-    if(diff <= 0){
-      clearInterval(interval);
-      span.textContent = "00:00";
-      alert(name + " completed!");
-      return;
-    }
-    const m = Math.floor(diff/60000);
-    const s = Math.floor((diff%60000)/1000);
-    span.textContent = m + ":" + (s<10?"0":"") + s;
+// ----------------- Navigation Tabs -----------------
+document.querySelectorAll("nav button").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+    document.getElementById(btn.dataset.tab).classList.add("active");
   };
+});
 
-  task.querySelector(".start").onclick = () => {
-    if(interval) return;
-    update();
-    interval = setInterval(update, 1000);
-  };
+// ----------------- Tasks -----------------
+// Quick Add template
+const quickTasks=[
+{name:"Study",time:30,priority:"High"},
+{name:"Exercise",time:20,priority:"Medium"},
+{name:"Meditate",time:10,priority:"Medium"},
+{name:"Read",time:25,priority:"Low"}
+];
+const quickDiv=document.getElementById("quickAddButtons");
+quickTasks.forEach(t=>{
+  const btn=document.createElement("button");
+  btn.textContent=t.name;
+  btn.onclick=()=>{addTask(t.name,t.time,t.priority)};
+  quickDiv.appendChild(btn);
+});
 
-  task.querySelector(".delete").onclick = () => {
-    clearInterval(interval);
-    task.remove();
-  };
+// Add Task
+function addTask(name,time,priority){
+  tasks.push({name,time,priority,completed:false});
+  saveTasks();
+  renderTasks();
+}
 
-  tasksDiv.appendChild(task);
-  taskName.value = "";
-  taskTime.value = "";
+document.getElementById("addTask").onclick=()=>{
+  const name=document.getElementById("taskName").value.trim();
+  const time=parseInt(document.getElementById("taskTime").value);
+  const priority=document.getElementById("taskPriority").value;
+  if(!name||!time)return;
+  addTask(name,time,priority);
+  document.getElementById("taskName").value="";
+  document.getElementById("taskTime").value="";
 };
 
-themeToggle.onclick = () => {
-  document.body.classList.toggle("light");
+// Render Tasks
+function renderTasks(){
+  tasksDiv.innerHTML="";
+  const sorted=[...tasks].sort((a,b)=>{
+    const map={"High":1,"Medium":2,"Low":3};
+    return map[a.priority]-map[b.priority];
+  });
+  sorted.forEach((task,i)=>{
+    const div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`
+      <strong>${task.name} (${task.priority})</strong>
+      <div>Remaining: <span>--:--</span></div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div class="task-buttons">
+        <button class="start">Start</button>
+        <button class="delete">Delete</button>
+      </div>
+    `;
+    const span=div.querySelector("span");
+    const fill=div.querySelector(".progress-fill");
+    let endTime=null, taskInterval=null;
+
+    const update=()=>{
+      const diff=endTime-Date.now();
+      if(diff<=0){
+        clearInterval(taskInterval);
+        span.textContent="00:00";
+        fill.style.width="100%";
+        tasks[i].completed=true;
+        saveTasks();
+        buzzer.play();
+        new Notification("Task Completed",{body:task.name});
+        alert(quotes[Math.floor(Math.random()*quotes.length)]);
+        updateStreak();
+        if(document.getElementById("autoMode").checked){
+          const gap=parseInt(document.getElementById("gapTime").value)*1000||5000;
+          setTimeout(()=>startNextTask(i+1),gap);
+        }
+        return;
+      }
+      const m=Math.floor(diff/60000);
+      const s=Math.floor((diff%60000)/1000);
+      span.textContent=m+":"+(s<10?"0":"")+s;
+      fill.style.width=((task.time*60*1000-diff)/(task.time*60*1000))*100+"%";
+    };
+
+    div.querySelector(".start").onclick=()=>{
+      if(taskInterval)return;
+      endTime=Date.now()+task.time*60000;
+      update();
+      taskInterval=setInterval(update,1000);
+    };
+
+    div.querySelector(".delete").onclick=()=>{
+      clearInterval(taskInterval);
+      tasks.splice(i,1);
+      saveTasks();
+      renderTasks();
+    };
+
+    tasksDiv.appendChild(div);
+  });
+}
+
+function startNextTask(index){
+  if(index>=tasks.length)return;
+  const taskDiv=tasksDiv.children[index];
+  if(taskDiv)taskDiv.querySelector(".start").click();
+}
+
+// ----------------- Diary -----------------
+document.getElementById("addDiary").onclick=()=>{
+  const text=document.getElementById("diaryText").value.trim();
+  if(!text)return;
+  diary.push({text, date:new Date().toLocaleDateString()});
+  saveDiary();
+  document.getElementById("diaryText").value="";
+  renderDiary();
 };
+
+function renderDiary(){
+  diaryDiv.innerHTML="";
+  diary.forEach((d,i)=>{
+    const div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`
+      <strong>${d.date}</strong>
+      <p>${d.text}</p>
+      <div class="task-buttons">
+        <button class="delete">Delete</button>
+        <button class="share">Share WhatsApp</button>
+      </div>
+    `;
+    div.querySelector(".delete").onclick=()=>{
+      diary.splice(i,1);
+      saveDiary();
+      renderDiary();
+    };
+    div.querySelector(".share").onclick=()=>{
+      const msg=encodeURIComponent(`${d.date}: ${d.text}`);
+      window.open(`https://wa.me/?text=${msg}`, "_blank");
+    };
+    diaryDiv.appendChild(div);
+  });
+}
+
+// ----------------- Stats / Streak -----------------
+function updateStreak(){
+  const today=new Date().toLocaleDateString();
+  const todayTasks=tasks.filter(t=>t.date===today||!t.date);
+  const completedTasks=tasks.filter(t=>t.completed&&(t.date===today||!t.date));
+  const half=Math.ceil(todayTasks.length/2);
+  if(completedTasks.length>=half && !streakDays.includes(today)){
+    streakDays.push(today);
+    saveStreak();
+  }
+  document.getElementById("streakDisplay").textContent=`${streakDays.length}/7 days`;
+}
+
+document.getElementById("exportData").onclick=()=>{
+  const data={tasks,diary,streakDays};
+  const blob=new Blob([JSON.stringify(data, null, 2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="focus-planner-data.json"; a.click();
+};
+
+document.getElementById("importData").onclick=()=>{
+  const input=document.createElement("input");
+  input.type="file"; input.accept=".json";
+  input.onchange=e=>{
+    const file=e.target.files[0];
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const data=JSON.parse(ev.target.result);
+      tasks=data.tasks||[]; diary=data.diary||[]; streakDays=data.streakDays||[];
+      saveTasks(); saveDiary(); saveStreak();
+      renderTasks(); renderDiary(); updateStreak();
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+};
+
+// ----------------- Dark/Light Toggle -----------------
+document.getElementById("themeToggle").onclick=()=>{document.body.classList.toggle("light");};
+
+// ----------------- Notification Permission -----------------
+if(Notification.permission!=="granted")Notification.requestPermission();
+
+// ----------------- Initial Render -----------------
+renderTasks(); renderDiary(); updateStreak();
 </script>
 </body>
 </html>
