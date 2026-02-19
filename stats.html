@@ -25,11 +25,15 @@ h1.title{font-family:'Comic Sans MS',cursive,sans-serif;font-size:2rem;margin-bo
 nav{margin-bottom:15px;}
 nav button{margin:0 5px;padding:8px 12px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;background:var(--btn);color:#fff;}
 .card{background:var(--card);padding:15px;border-radius:12px;text-align:left;margin-bottom:15px;}
-button,input{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
+button,input,textarea{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
 button{background:var(--btn);color:#fff;cursor:pointer;}
+.calendar-header{text-align:center;margin-bottom:10px;}
+.calendar-header span{font-weight:bold;}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;}
-.day{padding:10px;border-radius:5px;background:rgba(255,255,255,0.2);cursor:pointer;}
+.day{padding:10px;border-radius:5px;background:rgba(255,255,255,0.2);cursor:pointer;position:relative;}
+.day.today{border:2px solid gold;}
 .day.marked{background:gold;color:#000;font-weight:bold;}
+.reminder{position:absolute;bottom:2px;left:2px;font-size:12px;color:#000;}
 textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 </style>
 </head>
@@ -50,6 +54,9 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 
   <div class="card">
     <h3>Calendar</h3>
+    <div class="calendar-header">
+      <span id="monthYear"></span>
+    </div>
     <div id="calendar" class="calendar"></div>
   </div>
 
@@ -67,7 +74,7 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 
   <div class="card">
     <h3>Privacy Policy</h3>
-    <p>This web app does not collect personal data. All tasks and diary entries are stored locally on your device.</p>
+    <p>This web app does not collect personal data. All tasks and diary entries are stored locally on your device. For any queries, contact: <strong>lordlofi014@gmail.com</strong></p>
     <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq"><button style="margin-top:10px">LORD LOFI EDITZ</button></a>
   </div>
 </div>
@@ -78,26 +85,47 @@ document.getElementById("themeToggle").onclick=()=>{document.body.classList.togg
 
 // ---------- Calendar ----------
 let markedDates=JSON.parse(localStorage.getItem("markedDates")||"[]");
+let reminders=JSON.parse(localStorage.getItem("reminders")||"{}");
 const calendar=document.getElementById("calendar");
+const monthYear=document.getElementById("monthYear");
+
 function renderCalendar(){
   calendar.innerHTML="";
   const now=new Date();
   const year=now.getFullYear(), month=now.getMonth();
+  const today=now.getDate();
   const firstDay=new Date(year,month,1).getDay();
   const daysInMonth=new Date(year,month+1,0).getDate();
+  monthYear.textContent=`${now.toLocaleString('default',{month:'long'})} ${year}`;
+
   for(let i=0;i<firstDay;i++){calendar.appendChild(document.createElement("div"));}
   for(let d=1;d<=daysInMonth;d++){
     const day=document.createElement("div");
     day.className="day";
+    if(d===today) day.classList.add("today");
+
     const dayStr=`${year}-${month+1}-${d}`;
     if(markedDates.includes(dayStr)) day.classList.add("marked");
+
     day.textContent=d;
+
+    if(reminders[dayStr]){
+      const rem=document.createElement("div");
+      rem.className="reminder";
+      rem.textContent=reminders[dayStr];
+      day.appendChild(rem);
+    }
+
     day.onclick=()=>{
-      if(markedDates.includes(dayStr)){
-        markedDates=markedDates.filter(x=>x!==dayStr);
-      } else markedDates.push(dayStr);
-      localStorage.setItem("markedDates",JSON.stringify(markedDates));
-      renderCalendar();
+      let msg=prompt(`Add/Update reminder for ${dayStr}:`, reminders[dayStr]||"");
+      if(msg!==null){
+        reminders[dayStr]=msg;
+        if(msg==="") delete reminders[dayStr];
+        if(!markedDates.includes(dayStr)) markedDates.push(dayStr);
+        localStorage.setItem("markedDates",JSON.stringify(markedDates));
+        localStorage.setItem("reminders",JSON.stringify(reminders));
+        renderCalendar();
+      }
     };
     calendar.appendChild(day);
   }
@@ -123,7 +151,7 @@ document.getElementById("exportBtn").onclick=()=>{
   const diary=JSON.parse(localStorage.getItem("diaryEntries")||"[]");
   const streak=JSON.parse(localStorage.getItem("streakDays")||"[]");
   const marked=JSON.parse(localStorage.getItem("markedDates")||"[]");
-  const data={tasks,diary,streak,marked};
+  const data={tasks,diary,streak,marked,reminders};
   const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
@@ -142,6 +170,7 @@ document.getElementById("importFile").onchange=(e)=>{
       if(data.diary)localStorage.setItem("diaryEntries",JSON.stringify(data.diary));
       if(data.streak)localStorage.setItem("streakDays",JSON.stringify(data.streak));
       if(data.marked)localStorage.setItem("markedDates",JSON.stringify(data.marked));
+      if(data.reminders)localStorage.setItem("reminders",JSON.stringify(data.reminders));
       alert("Data imported successfully! Refresh other pages to see changes.");
     }catch(err){alert("Invalid file.");}
   };
