@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>OM SANSKAR - Stats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
+<style>
+:root{
+  --bg1:#4169e1; --bg2:#87ceeb; --bg3:#000080;
+  --card:rgba(255,255,255,0.85); --text:#000; --btn:#800080;
+}
+body.dark{
+  --bg1:#4169e1; --bg2:#87ceeb; --bg3:#000080; --card:rgba(0,0,0,0.85); --text:#fff; --btn:#800080;
+}
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));color:var(--text);min-height:100vh;}
+.container{max-width:700px;margin:auto;padding:20px;text-align:center;}
+h1.title{font-family:'Comic Sans MS',cursive,sans-serif;font-size:2rem;margin-bottom:10px;}
+nav{margin-bottom:15px;}
+nav button{margin:0 5px;padding:8px 12px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;background:var(--btn);color:#fff;}
+.card{background:var(--card);padding:15px;border-radius:12px;text-align:left;margin-bottom:15px;}
+button,input{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
+button{background:var(--btn);color:#fff;cursor:pointer;}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;}
+.day{padding:10px;border-radius:5px;background:rgba(255,255,255,0.2);cursor:pointer;}
+.day.marked{background:gold;color:#000;font-weight:bold;}
+textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 class="title">OM SANSKAR - Stats & Calendar</h1>
+  <button id="themeToggle">🌙 Toggle Theme</button>
+  <nav>
+    <button onclick="location.href='index.html'">Tasks</button>
+    <button onclick="location.href='diary.html'">Diary</button>
+    <button onclick="location.href='stats.html'">Stats</button>
+  </nav>
+
+  <div class="card">
+    <h3>Calendar</h3>
+    <div id="calendar" class="calendar"></div>
+  </div>
+
+  <div class="card">
+    <h3>Motivational Quote</h3>
+    <p id="quote"></p>
+    <button id="newQuote">New Quote</button>
+  </div>
+
+  <div class="card">
+    <h3>Export / Import</h3>
+    <button id="exportBtn">Export Data</button>
+    <input type="file" id="importFile">
+  </div>
+
+  <div class="card">
+    <h3>Privacy Policy</h3>
+    <p>This web app does not collect personal data. All tasks and diary entries are stored locally on your device.</p>
+    <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq"><button style="margin-top:10px">LORD LOFI EDITZ</button></a>
+  </div>
+</div>
+
+<script>
+// ---------- Theme ----------
+document.getElementById("themeToggle").onclick=()=>{document.body.classList.toggle("dark");}
+
+// ---------- Calendar ----------
+let markedDates=JSON.parse(localStorage.getItem("markedDates")||"[]");
+const calendar=document.getElementById("calendar");
+function renderCalendar(){
+  calendar.innerHTML="";
+  const now=new Date();
+  const year=now.getFullYear(), month=now.getMonth();
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  for(let i=0;i<firstDay;i++){const blank=document.createElement("div");calendar.appendChild(blank);}
+  for(let d=1;d<=daysInMonth;d++){
+    const day=document.createElement("div");
+    day.className="day";
+    const dayStr=`${year}-${month+1}-${d}`;
+    if(markedDates.includes(dayStr)) day.classList.add("marked");
+    day.textContent=d;
+    day.onclick=()=>{
+      if(markedDates.includes(dayStr)){
+        markedDates=markedDates.filter(x=>x!==dayStr);
+      } else markedDates.push(dayStr);
+      localStorage.setItem("markedDates",JSON.stringify(markedDates));
+      renderCalendar();
+    };
+    calendar.appendChild(day);
+  }
+}
+renderCalendar();
+
+// ---------- Motivational Quotes ----------
+const quotes=[
+"Believe you can and you're halfway there.",
+"Every day is a second chance.",
+"Do what you can with what you have.",
+"Focus on progress, not perfection.",
+"Your limitation—it’s only your imagination.",
+"Push yourself, because no one else is going to do it for you.",
+"Great things never come from comfort zones.",
+"Dream it. Wish it. Do it.",
+"Success doesn’t just find you. You have to go out and get it.",
+"Don’t stop when you’re tired. Stop when you’re done.",
+"Little things make big days.",
+"Don’t wait for opportunity. Create it.",
+"Sometimes later becomes never. Do it now.",
+"Hard work beats talent when talent doesn’t work hard.",
+"Stay positive, work hard, make it happen.",
+"Don’t watch the clock; do what it does. Keep going.",
+"Your only limit is you.",
+"The key to success is to start before you’re ready.",
+"Don’t count the days; make the days count.",
+"Work hard in silence. Let success make the noise.",
+"Success is not for the lazy.",
+"Believe in yourself and all that you are.",
+"Good things take time.",
+"Stay focused and never give up.",
+"Every accomplishment starts with the decision to try.",
+"Wake up with determination. Go to bed with satisfaction.",
+"Opportunities don’t happen, you create them.",
+"Don’t quit. Suffer now and live the rest of your life as a champion.",
+"Your future is created by what you do today."
+];
+function newQuote(){document.getElementById("quote").textContent=quotes[Math.floor(Math.random()*quotes.length)];}
+document.getElementById("newQuote").onclick=newQuote;
+newQuote();
+
+// ---------- Export / Import ----------
+document.getElementById("exportBtn").onclick=()=>{
+  const tasks=JSON.parse(localStorage.getItem("tasks")||"[]");
+  const diary=JSON.parse(localStorage.getItem("diaryEntries")||"[]");
+  const streak=JSON.parse(localStorage.getItem("streakDays")||"[]");
+  const marked=JSON.parse(localStorage.getItem("markedDates")||"[]");
+  const data={tasks,diary,streak,marked};
+  const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="focus-planner-data.json"; a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById("importFile").onchange=(e)=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(data.tasks)localStorage.setItem("tasks",JSON.stringify(data.tasks));
+      if(data.diary)localStorage.setItem("diaryEntries",JSON.stringify(data.diary));
+      if(data.streak)localStorage.setItem("streakDays",JSON.stringify(data.streak));
+      if(data.marked)localStorage.setItem("markedDates",JSON.stringify(data.marked));
+      alert("Data imported successfully! Refresh other pages to see changes.");
+    }catch(err){alert("Invalid file.");}
+  };
+  reader.readAsText(file);
+};
+</script>
+</body>
+</html>
