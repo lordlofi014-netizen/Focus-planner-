@@ -37,7 +37,7 @@ textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
 <div class="container">
   <h1 class="title">OM SANSKAR - Stats & Calendar</h1>
 
-  <!-- Install Button -->
+  <!-- Install Button (ONLY on this page) -->
   <button id="installBtn" style="margin:10px 0; background:gold; color:#000; font-weight:bold; display:none;">📲 Install App</button>
 
   <button id="themeToggle">🌙 Toggle Theme</button>
@@ -148,7 +148,7 @@ document.getElementById("importFile").onchange=(e)=>{
   reader.readAsText(file);
 };
 
-// ---------- PWA Install Button ----------
+// ---------- PWA Install Button (Only here) ----------
 let deferredPrompt;
 const installBtn = document.getElementById('installBtn');
 window.addEventListener('beforeinstallprompt', (e) => {
