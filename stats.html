@@ -5,6 +5,12 @@
 <title>OM SANSKAR - Stats</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
+
+<!-- PWA Support -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4169e1">
+<link rel="apple-touch-icon" href="icon-192.png">
+
 <style>
 :root{
   --bg1:#4169e1; --bg2:#87ceeb; --bg3:#000080;
@@ -159,6 +165,13 @@ document.getElementById("importFile").onchange=(e)=>{
   };
   reader.readAsText(file);
 };
+
+// ---------- PWA Service Worker Registration ----------
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js')
+  .then(()=>console.log('Service Worker Registered'))
+  .catch(err=>console.log('SW Registration Failed:', err));
+}
 </script>
 </body>
 </html>
