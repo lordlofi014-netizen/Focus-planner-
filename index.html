@@ -1,82 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Focus Planner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Focus Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
 
-  <!-- Google Search Console verification -->
-  <meta name="google-site-verification"
-        content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
-
-  <style>
-    :root{
-      --bg1:#667eea;
-      --bg2:#764ba2;
-      --card:rgba(0,0,0,0.3);
-      --text:#ffffff;
-      --btn:#00d2ff;
-      --danger:#ff4d4d;
-    }
-    body.light{
-      --bg1:#f5f7fa;
-      --bg2:#c3cfe2;
-      --card:rgba(255,255,255,0.9);
-      --text:#000000;
-      --btn:#667eea;
-    }
-    body{
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:linear-gradient(135deg,var(--bg1),var(--bg2));
-      color:var(--text);
-      min-height:100vh;
-    }
-    .container{
-      max-width:500px;
-      margin:auto;
-      padding:20px;
-    }
-    h1{text-align:center;}
-    .card{
-      background:var(--card);
-      padding:15px;
-      border-radius:12px;
-    }
-    input,button{
-      width:100%;
-      padding:10px;
-      margin-top:10px;
-      border:none;
-      border-radius:8px;
-      font-size:15px;
-    }
-    button{
-      background:var(--btn);
-      color:#fff;
-      cursor:pointer;
-    }
-    .task{
-      background:rgba(255,255,255,0.15);
-      padding:10px;
-      border-radius:8px;
-      margin-top:10px;
-    }
-    .task-buttons{
-      display:flex;
-      gap:10px;
-      margin-top:8px;
-    }
-    .delete{
-      background:var(--danger);
-    }
-  </style>
+<style>
+:root{
+  --bg1:#667eea;
+  --bg2:#764ba2;
+  --card:rgba(0,0,0,0.3);
+  --text:#fff;
+  --btn:#00d2ff;
+  --danger:#ff4d4d;
+}
+body.light{
+  --bg1:#f5f7fa;
+  --bg2:#c3cfe2;
+  --card:rgba(255,255,255,0.85);
+  --text:#000;
+  --btn:#667eea;
+}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  min-height:100vh;
+}
+.container{max-width:500px;margin:auto;padding:20px;text-align:center;}
+h1.title{font-family:'Comic Sans MS', cursive, sans-serif;font-size:2rem;margin-bottom:10px;}
+.card{background:var(--card);padding:15px;border-radius:12px;text-align:left;}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+}
+button{background:var(--btn);color:#fff;font-size:16px;}
+.task{
+  background:rgba(255,255,255,0.15);
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+}
+.task-buttons{display:flex;gap:10px;}
+.delete{background:var(--danger);}
+.privacy{background:var(--card);padding:15px;border-radius:12px;margin-top:20px;text-align:left;font-size:0.9rem;}
+</style>
 </head>
 
 <body>
 <div class="container">
-  <h1>Focus Planner</h1>
-
+  <h1 class="title">OM SANSKAR</h1>
   <button id="themeToggle">🌙 Toggle Theme</button>
 
   <div class="card">
@@ -90,19 +68,26 @@
   <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq">
     <button style="margin-top:15px">LORD LOFI EDITZ</button>
   </a>
+
+  <!-- Privacy Policy Section -->
+  <div class="privacy">
+    <h2>Privacy Policy</h2>
+    <p>We do not collect any personal information. All tasks and data are stored locally in your browser and are not sent to any server.</p>
+    <p>Cookies or local storage are used only to keep your tasks and theme preferences.</p>
+    <p>By using this site, you agree to this privacy policy.</p>
+    <p>Contact: <a href="mailto:your-email@example.com">your-email@example.com</a></p>
+  </div>
 </div>
 
 <script>
 const tasksDiv = document.getElementById("tasks");
-const taskName = document.getElementById("taskName");
-const taskTime = document.getElementById("taskTime");
 
 document.getElementById("addTask").onclick = () => {
   const name = taskName.value.trim();
   const mins = parseInt(taskTime.value);
   if(!name || !mins) return;
 
-  const endTime = Date.now() + mins * 60000;
+  const endTime = Date.now() + mins*60000;
 
   const task = document.createElement("div");
   task.className = "task";
@@ -127,9 +112,9 @@ document.getElementById("addTask").onclick = () => {
       alert(name + " completed!");
       return;
     }
-    const m = Math.floor(diff / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    span.textContent = m + ":" + (s < 10 ? "0" : "") + s;
+    const m = Math.floor(diff/60000);
+    const s = Math.floor((diff%60000)/1000);
+    span.textContent = m + ":" + (s<10?"0":"") + s;
   };
 
   task.querySelector(".start").onclick = () => {
@@ -148,7 +133,7 @@ document.getElementById("addTask").onclick = () => {
   taskTime.value = "";
 };
 
-document.getElementById("themeToggle").onclick = () => {
+themeToggle.onclick = () => {
   document.body.classList.toggle("light");
 };
 </script>
