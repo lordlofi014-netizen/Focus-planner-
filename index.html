@@ -2,19 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>OM SANSKAR - Tasks</title>
+<title>OM SANSKAR - Focus Planner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="d0wkB4IEYuCL7a86CknBhYWhtrP8g87WdtquUYa4i4g" />
-
-<!-- PWA Support -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4169e1">
-<link rel="apple-touch-icon" href="icon-192.png">
-
 <style>
 :root{
   --bg1:#4169e1; --bg2:#87ceeb; --bg3:#000080;
-  --card:rgba(255,255,255,0.85); --text:#000; --btn:#800080;
+  --card:rgba(255,255,255,0.85); --text:#000; --btn:#800080; --danger:#ff4d4d;
 }
 body.dark{
   --bg1:#4169e1; --bg2:#87ceeb; --bg3:#000080; --card:rgba(0,0,0,0.85); --text:#fff; --btn:#800080;
@@ -25,75 +19,189 @@ h1.title{font-family:'Comic Sans MS',cursive,sans-serif;font-size:2rem;margin-bo
 nav{margin-bottom:15px;}
 nav button{margin:0 5px;padding:8px 12px;font-weight:bold;border:none;border-radius:5px;cursor:pointer;background:var(--btn);color:#fff;}
 .card{background:var(--card);padding:15px;border-radius:12px;text-align:left;margin-bottom:15px;}
-button,input{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;font-size:16px;}
-button{background:var(--btn);color:#fff;cursor:pointer;}
-textarea{width:100%;padding:10px;border-radius:8px;margin-top:10px;}
+input,select,textarea,button{width:100%;padding:10px;margin-top:10px;border:none;border-radius:8px;}
+button{background:var(--btn);color:#fff;font-size:16px;cursor:pointer;}
+.task{background:rgba(255,255,255,0.15);padding:10px;border-radius:8px;margin-top:10px;}
+.task-buttons{display:flex;gap:10px;margin-top:5px;}
+.delete{background:var(--danger);}
+.progress{height:6px;background:#ccc;border-radius:3px;margin-top:5px;}
+.progress-fill{height:6px;background:var(--btn);border-radius:3px;width:0%;}
+.stars{margin:10px 0;font-size:1.5rem;color:gold;}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1 class="title">OM SANSKAR - Tasks</h1>
-
-  <!-- Install Button -->
-  <button id="installBtn" style="margin:10px 0; background:gold; color:#000; font-weight:bold; display:none;">📲 Install App</button>
-
+  <h1 class="title">OM SANSKAR - Focus Planner</h1>
   <button id="themeToggle">🌙 Toggle Theme</button>
-
   <nav>
     <button onclick="location.href='index.html'">Tasks</button>
     <button onclick="location.href='diary.html'">Diary</button>
     <button onclick="location.href='stats.html'">Stats</button>
   </nav>
 
+  <div class="stars" id="streakStars"></div>
+
   <div class="card">
-    <h3>Today's Tasks</h3>
-    <textarea id="tasks" placeholder="Add your tasks here..."></textarea>
-    <button id="saveTasks">Save Tasks</button>
+    <input id="taskName" placeholder="Task name">
+    <input id="taskTime" type="number" placeholder="Time in minutes">
+    <select id="taskPriority">
+      <option value="High">High Priority</option>
+      <option value="Medium">Medium Priority</option>
+      <option value="Low">Low Priority</option>
+    </select>
+    <button id="addTask">Add Task</button>
+    <h4>Quick Add:</h4>
+    <div id="quickAddButtons"></div>
+    <label>Auto Mode <input type="checkbox" id="autoMode"></label>
+    <label>Gap between tasks (seconds): <input type="number" id="gapTime" value="5" min="0" max="60"></label>
   </div>
 
+  <div id="tasksList"></div>
+  <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq"><button style="margin-top:15px">LORD LOFI EDITZ</button></a>
 </div>
 
+<audio id="buzzer" src="https://www.soundjay.com/buttons/sounds/beep-07.mp3" preload="auto"></audio>
+
 <script>
-// ---------- Theme ----------
+// ---------- Variables ----------
+let tasks=JSON.parse(localStorage.getItem("tasks")||"[]");
+let streakDays=JSON.parse(localStorage.getItem("streakDays")||"[]");
+const tasksDiv=document.getElementById("tasksList");
+const buzzer=document.getElementById("buzzer");
+
+// Quick Add template
+const quickTasks=[
+{name:"Study",time:30,priority:"High"},
+{name:"Exercise",time:20,priority:"Medium"},
+{name:"Meditate",time:10,priority:"Medium"},
+{name:"Read",time:25,priority:"Low"}
+];
+const quickDiv=document.getElementById("quickAddButtons");
+quickTasks.forEach(t=>{
+  const btn=document.createElement("button");
+  btn.textContent=t.name;
+  btn.onclick=()=>{addTask(t.name,t.time,t.priority)};
+  quickDiv.appendChild(btn);
+});
+
+// ---------- Functions ----------
+function saveTasks(){localStorage.setItem("tasks",JSON.stringify(tasks));}
+function saveStreak(){localStorage.setItem("streakDays",JSON.stringify(streakDays));}
+
+function addTask(name,time,priority){
+  tasks.push({name,time,priority,completed:false});
+  saveTasks();
+  renderTasks();
+}
+
+document.getElementById("addTask").onclick=()=>{
+  const name=document.getElementById("taskName").value.trim();
+  const time=parseInt(document.getElementById("taskTime").value);
+  const priority=document.getElementById("taskPriority").value;
+  if(!name||!time)return;
+  addTask(name,time,priority);
+  document.getElementById("taskName").value="";
+  document.getElementById("taskTime").value="";
+};
+
+// Render tasks
+function renderTasks(){
+  tasksDiv.innerHTML="";
+  const sorted=[...tasks].sort((a,b)=>{
+    const map={"High":1,"Medium":2,"Low":3};
+    return map[a.priority]-map[b.priority];
+  });
+  sorted.forEach((task,i)=>{
+    const div=document.createElement("div");
+    div.className="task";
+    div.innerHTML=`
+      <strong>${task.name} (${task.priority})</strong>
+      <div>Remaining: <span>--:--</span></div>
+      <div class="progress"><div class="progress-fill"></div></div>
+      <div class="task-buttons">
+        <button class="start">Start</button>
+        <button class="delete">Delete</button>
+      </div>
+    `;
+    const span=div.querySelector("span");
+    const fill=div.querySelector(".progress-fill");
+    let endTime=null, taskInterval=null;
+
+    const update=()=>{
+      const diff=endTime-Date.now();
+      if(diff<=0){
+        clearInterval(taskInterval);
+        span.textContent="00:00";
+        fill.style.width="100%";
+        tasks[i].completed=true;
+        saveTasks();
+        buzzer.play();
+        alert("Task Completed! ✅");
+        updateStreak();
+        // Auto next
+        if(document.getElementById("autoMode").checked){
+          const gap=parseInt(document.getElementById("gapTime").value)*1000||5000;
+          setTimeout(()=>startNextTask(i+1),gap);
+        }
+        return;
+      }
+      const m=Math.floor(diff/60000);
+      const s=Math.floor((diff%60000)/1000);
+      span.textContent=m+":"+(s<10?"0":"")+s;
+      fill.style.width=((task.time*60*1000-diff)/(task.time*60*1000))*100+"%";
+    };
+
+    div.querySelector(".start").onclick=()=>{
+      if(taskInterval)return;
+      endTime=Date.now()+task.time*60000;
+      update();
+      taskInterval=setInterval(update,1000);
+    };
+
+    div.querySelector(".delete").onclick=()=>{
+      clearInterval(taskInterval);
+      tasks.splice(i,1);
+      saveTasks();
+      renderTasks();
+    };
+
+    tasksDiv.appendChild(div);
+  });
+}
+
+// Start next task in auto mode
+function startNextTask(index){
+  if(index>=tasks.length)return;
+  const taskDiv=tasksDiv.children[index];
+  if(taskDiv)taskDiv.querySelector(".start").click();
+}
+
+// ---------- Streak ----------
+function updateStreak(){
+  const today=new Date().toLocaleDateString();
+  const todayTasks=tasks;
+  const completedTasks=tasks.filter(t=>t.completed);
+  const half=Math.ceil(todayTasks.length/2);
+  if(completedTasks.length>=half && !streakDays.includes(today)){
+    streakDays.push(today);
+    saveStreak();
+  }
+  renderStars();
+}
+
+function renderStars(){
+  const maxStars=7;
+  const container=document.getElementById("streakStars");
+  container.innerHTML="";
+  const count=streakDays.length>maxStars?maxStars:streakDays.length;
+  for(let i=0;i<count;i++)container.innerHTML+="⭐";
+}
+
+// ---------- Dark/Light Mode ----------
 document.getElementById("themeToggle").onclick=()=>{document.body.classList.toggle("dark");}
 
-// ---------- Save Tasks ----------
-document.getElementById("saveTasks").onclick=()=>{
-  const tasks=document.getElementById("tasks").value.split("\n").filter(t=>t);
-  localStorage.setItem("tasks",JSON.stringify(tasks));
-  alert("Tasks saved!");
-}
-
-// ---------- PWA Install Button ----------
-let deferredPrompt;
-const installBtn = document.getElementById('installBtn');
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  installBtn.style.display = 'block';
-});
-installBtn.addEventListener('click', async () => {
-  installBtn.style.display = 'none';
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    console.log('User response to install:', outcome);
-  }
-});
-
-// ---------- Service Worker ----------
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js')
-  .then(()=>console.log('SW Registered'))
-  .catch(err=>console.log('SW Registration Failed:', err));
-}
-
-// Load saved tasks
-document.addEventListener('DOMContentLoaded', ()=>{
-  const saved=JSON.parse(localStorage.getItem("tasks")||"[]");
-  document.getElementById("tasks").value=saved.join("\n");
-});
+// ---------- Initial Render ----------
+renderTasks(); updateStreak();
 </script>
 </body>
 </html>
