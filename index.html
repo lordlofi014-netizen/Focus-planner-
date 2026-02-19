@@ -1,177 +1,155 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Focus Planner</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <style>
-    :root{
-      --bg1:#667eea;
-      --bg2:#764ba2;
-      --card:rgba(0,0,0,0.3);
-      --text:#ffffff;
-      --btn:#00d2ff;
-    }
+<meta charset="UTF-8">
+<title>Focus Planner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    body.light{
-      --bg1:#f5f7fa;
-      --bg2:#c3cfe2;
-      --card:rgba(255,255,255,0.8);
-      --text:#000;
-      --btn:#667eea;
-    }
+<style>
+:root{
+  --bg1:#667eea;
+  --bg2:#764ba2;
+  --card:rgba(0,0,0,0.3);
+  --text:#ffffff;
+  --btn:#00d2ff;
+}
 
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family:Arial, sans-serif;
-      background:linear-gradient(135deg,var(--bg1),var(--bg2));
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      color:var(--text);
-    }
+body.light{
+  --bg1:#f5f7fa;
+  --bg2:#c3cfe2;
+  --card:rgba(255,255,255,0.85);
+  --text:#000000;
+  --btn:#667eea;
+}
 
-    .container{
-      width:95%;
-      max-width:380px;
-      background:var(--card);
-      padding:20px;
-      border-radius:16px;
-      box-shadow:0 15px 40px rgba(0,0,0,0.35);
-    }
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2));
+  color:var(--text);
+  min-height:100vh;
+}
 
-    h1{text-align:center;margin:0 0 10px}
+.container{
+  max-width:500px;
+  margin:auto;
+  padding:20px;
+}
 
-    input,button{
-      width:100%;
-      padding:10px;
-      margin-top:8px;
-      border:none;
-      border-radius:8px;
-      font-size:14px;
-    }
+h1{
+  text-align:center;
+}
 
-    button{
-      background:var(--btn);
-      font-weight:bold;
-      cursor:pointer;
-    }
+.card{
+  background:var(--card);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+}
 
-    button:hover{opacity:.85}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+}
 
-    .task{
-      background:rgba(255,255,255,0.15);
-      padding:10px;
-      border-radius:10px;
-      margin-top:10px;
-    }
+button{
+  background:var(--btn);
+  color:white;
+  cursor:pointer;
+}
 
-    .row{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-    }
+.task{
+  margin-top:10px;
+  padding:10px;
+  background:rgba(255,255,255,0.15);
+  border-radius:8px;
+}
 
-    .row button{
-      width:auto;
-      padding:6px 10px;
-      font-size:12px;
-    }
+.timer{
+  font-size:14px;
+  margin-top:5px;
+}
 
-    .lofi{
-      margin-top:15px;
-      display:block;
-      text-align:center;
-      padding:10px;
-      border-radius:10px;
-      background:linear-gradient(135deg,#ff512f,#f09819);
-      color:#fff;
-      font-weight:bold;
-      text-decoration:none;
-    }
+.toggle{
+  text-align:center;
+  margin-bottom:10px;
+}
+</style>
+</head>
 
-    .toggle{
-      background:#00000030;
-      color:var(--text);
-    }
-  </style></head>
-<body><div class="container">
-  <h1>Focus Planner</h1><button class="toggle" onclick="toggleTheme()">Toggle Dark / Light</button>
+<body>
+<div class="container">
+  <h1>Focus Planner</h1>
 
-  <input id="name" placeholder="Task name">
-  <input id="time" type="number" placeholder="Minutes">
-  <button onclick="addTask()">Add Task</button>  <div id="list"></div>  <a class="lofi" href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq" target="_blank">
-    LORD LOFI EDITZ
+  <div class="toggle">
+    <button id="themeToggle">🌙 Toggle Theme</button>
+  </div>
+
+  <div class="card">
+    <input id="taskName" placeholder="Task name (Study, Work...)">
+    <input id="taskTime" type="number" placeholder="Time in minutes">
+    <button id="addTask">Add Task</button>
+  </div>
+
+  <div id="tasks"></div>
+
+  <a href="https://youtube.com/@lordlofi-014?si=688afuY83MkdbTpq">
+    <button style="margin-top:15px">LORD LOFI EDITZ</button>
   </a>
-</div><audio id="alarm">
-  <source src="https://www.soundjay.com/buttons/sounds/beep-07.mp3">
-</audio><script>
-  let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+</div>
 
-  function save(){ localStorage.setItem("tasks",JSON.stringify(tasks)); }
+<script>
+let tasksDiv = document.getElementById("tasks");
 
-  function toggleTheme(){ document.body.classList.toggle("light"); }
+document.getElementById("addTask").onclick = function(){
+  let name = taskName.value.trim();
+  let time = parseInt(taskTime.value);
 
-  function addTask(){
-    const name=document.getElementById("name").value;
-    const min=document.getElementById("time").value;
-    if(!name||!min) return;
+  if(!name || !time) return;
 
-    tasks.push({name,time:min*60,done:false});
-    save();
-    render();
+  let task = document.createElement("div");
+  task.className = "task";
 
-    document.getElementById("name").value="";
-    document.getElementById("time").value="";
-  }
+  let remaining = time * 60;
 
-  function deleteTask(i){ tasks.splice(i,1); save(); render(); }
+  task.innerHTML = `
+    <strong>${name}</strong>
+    <div class="timer">Time: <span>${time}:00</span></div>
+    <button>Start</button>
+  `;
 
-  function render(){
-    const box=document.getElementById("list");
-    box.innerHTML="";
+  let span = task.querySelector("span");
+  let btn = task.querySelector("button");
+  let interval;
 
-    tasks.forEach((t,i)=>{
-      const d=document.createElement("div");
-      d.className="task";
-
-      const title=document.createElement("strong");
-      title.innerText=t.name;
-
-      const timer=document.createElement("span");
-      timer.innerText=format(t.time);
-
-      const row=document.createElement("div");
-      row.className="row";
-
-      const start=document.createElement("button");
-      start.innerText="Start";
-      start.onclick=()=>runTimer(i,timer,start);
-
-      const del=document.createElement("button");
-      del.innerText="Delete";
-      del.onclick=()=>deleteTask(i);
-
-      row.append(start,del);
-      d.append(title,timer,row);
-      box.appendChild(d);
-    });
-  }
-
-  function runTimer(i,label,btn){
-    btn.disabled=true;
-    const int=setInterval(()=>{
-      if(tasks[i].time<=0){
-        clearInterval(int);
-        label.innerText="Completed";
-        document.getElementById("alarm").play();
-        save();
+  btn.onclick = function(){
+    if(interval) return;
+    interval = setInterval(()=>{
+      if(remaining <= 0){
+        clearInterval(interval);
+        alert(name + " completed!");
         return;
       }
-      tasks[i].time--;
-      label.innerText=format(tasks[i].time);
-      save();
+      remaining--;
+      let m = Math.floor(remaining/60);
+      let s = remaining%60;
+      span.textContent = m + ":" + (s<10?"0":"") + s;
     },1000);
-  }
+  };
 
-  funindex.html>
+  tasksDiv.appendChild(task);
+  taskName.value="";
+  taskTime.value="";
+};
+
+document.getElementById("themeToggle").onclick = function(){
+  document.body.classList.toggle("light");
+};
+</script>
+
+</body>
+</html>
